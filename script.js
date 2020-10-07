@@ -59,7 +59,7 @@ class Portfolio extends React.Component {
   }
 
   addStock(event) {
-    e.preventDefault();
+    event.preventDefault();
     const portfolio = this.state.portfolio.slice();
     portfolio.push(this.state.form);
     this.setState({
