@@ -25,10 +25,37 @@ class Portfolio extends React.Component {
         },
       ],
     };
+
+    this.removeStock = this.removeStock.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+  }
+
+  removeStock(index) {
+    const portfolio = this.state.portfolio.slice(); // shallow copy
+    portfolio.splice(index, 1); // remove value at index
+    this.setState({ portfolio });
+  }
+
+  handleChange(event, index) {
+    const portfolio = this.state.portfolio.slice(); // shallow copy
+    const { name, value } = event.target;
+    portfolio[index][name] = value;
+    this.setState({ portfolio });
   }
 
   render() {
     const { portfolio } = this.state;
+
+    const portfolio_market_value = portfolio.reduce(
+      (sum, stock) => stock.sharesOwned * stock.market_price + sum,
+      0
+    );
+    const portfolio_cost = portfolio.reduce(
+      (sum, stock) => stock.sharesOwned * stock.cost_per_share + sum,
+      0
+    );
+    const portfolio_gain = portfolio_market_value - portfolio_cost;
+
     return (
       <div className="container">
         <h1 className="text-center my-4">Britt Stocks</h1>
@@ -55,14 +82,18 @@ class Portfolio extends React.Component {
                     market_price,
                   } = stock;
 
+                  const market_value = sharesOwned * market_price;
+                  const gain = market_value - (sharesOwned - cost_per_share);
+
                   return (
                     <tr key={index}>
                       <td>{name}</td>
                       <td>
                         <input
                           type="number"
-                          name="shares_owned"
+                          name="sharesOwned"
                           value={sharesOwned}
+                          onChange={(e) => this.handleChange(e, index)}
                         />
                       </td>
                       <td>
@@ -70,6 +101,7 @@ class Portfolio extends React.Component {
                           type="number"
                           name="cost_per_share"
                           value={cost_per_share}
+                          onChange={(e) => this.handleChange(e, index)}
                         />
                       </td>
                       <td>
@@ -77,12 +109,16 @@ class Portfolio extends React.Component {
                           type="number"
                           name="market_price"
                           value={market_price}
+                          onChange={(e) => this.handleChange(e, index)}
                         />
                       </td>
-                      <td></td>
-                      <td></td>
+                      <td>{market_value}</td>
+                      <td>{gain}</td>
                       <td>
-                        <button className="btn btn-danger btn-small">
+                        <button
+                          className="btn btn-danger btn-small"
+                          onClick={() => this.removeStock(index)}
+                        >
                           Delete
                         </button>
                       </td>
@@ -91,6 +127,14 @@ class Portfolio extends React.Component {
                 })}
               </tbody>
             </table>
+          </div>
+          <div className="col-12 col-md-6">
+            <h4 className="mb-3">
+              Portfolio value: $ {portfolio_market_value}
+            </h4>
+          </div>
+          <div className="col-12 col-md-6">
+            <h4 className="mb-3">Portfolio gain/loss: $ {portfolio_gain}</h4>
           </div>
         </div>
       </div>
